@@ -67,7 +67,16 @@ void tolower_esperanto(char *str) {
 }
 
 
-void print_all(char (*out)[OUT_LEN], int *li, int *ri) {
+char (*out_alloc())[OL] {
+	char (*out)[OL] = malloc(ON * sizeof(*out));
+	for (int i = 0; i < ON; i++) {
+		strcpy(out[i], "");
+	}
+	return out;
+}
+
+
+void out_sprint(char *fbuf, char (*out)[OL], int *li, int *ri) {
 	bool is_read = false;
 
 	// print (->)
@@ -78,42 +87,72 @@ void print_all(char (*out)[OUT_LEN], int *li, int *ri) {
 	}
 
 	// print (<-)
-	for (int i = ++(*ri); i < OUT_NUM; i++) {
+	for (int i = ++(*ri); i < ON; i++) {
 		is_read = true;
 		printf("%s, ", out[i]);
 		strcpy(out[i], "");
 	}
 
-
-	// make up extra comma
+	// extra comma (x)
 	if (is_read) {
-		printf("\n");
+		printf("\b\b \n");
 	}
 }
 
 
-void morphemize(char *line, char (*out)[OUT_LEN]) {
+void out_copy(char (*src)[OL], char (*dst)[OL]) {
+	for (size_t i = 0; i < ON; i++) {
+		strcpy(src[i], dst[i]);
+	}
+}
+
+
+bool out_compare(char (*o1)[OL], char (*o2)[OL]) {
+	for (size_t i = 0; i < ON; i++) {
+		if (strcmp(o1[i], o2[i]) != 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+void morphemize(char *line, char (*out)[OL], char (*out_buf)[OL], FILE *fout) {
 
 	const char *ds = " \t\n\r,.?!:;\"'()[]{}-";
 	char *lword, *lword_old;
 	char *rword, *rword_old;
 	int li = 0;
-	int ri = OUT_NUM - 1;
+	int ri = ON - 1;
+	int li_buf, ri_buf;
 
-	bool match;
+	bool match = false;
+	bool is_equal = false;
+
+	char fbuf[ON * OL + 1];
+
 	for (lword = strtok(line, ds); lword != NULL; lword = strtok(NULL, ds)) {
 		rword = lword + strlen(lword) - 1;
 
 		if (match) {
-			print_all(out, &li, &ri);
+			//if (is_equal) {
+			//	sprintf(fbuf, "(");
+			//	out_sprint(fbuf, out_buf, &li_buf, &ri_buf);
+			//	sprintf(fbuf, "|");
+			//	out_sprint(fbuf, out,     &li,     &ri);
+			//	sprintf(fbuf, ")");
+			//} else {
+			out_sprint(fbuf, out,     &li,     &ri);
+			//}
+			//fprintf(fout, "%s", fbuf);
 		}
 
 		li = 0;
-		ri = OUT_NUM - 1;
+		ri = ON - 1;
 
 		// print whole word
 		printf("%s: ", lword);
-		// skip letters and numbers
+		// skip letters and numbers analysis
 		if (strlen(lword) == 1 || isdigit(*lword)) {
 			printf("%s\n", lword);
 			continue;
@@ -121,7 +160,7 @@ void morphemize(char *line, char (*out)[OUT_LEN]) {
 
 		tolower_esperanto(lword);
 
-		// cores (words without endings or with pseudo-endings)
+		// cores (a priori words)
 		match = search_full(lword, out, &li, &get_core);
 		if (match) {
 			continue;
@@ -130,7 +169,7 @@ void morphemize(char *line, char (*out)[OUT_LEN]) {
 		// -j, -n
 		rword = strip_jn(rword, out, &ri);
 
-		// pronouns, numerals, correlatives,
+		// meta (pronouns, numerals, correlatives)
 		match = search_full(lword, out, &li, &get_meta);
 		if (match) {
 			continue;
@@ -145,43 +184,54 @@ void morphemize(char *line, char (*out)[OUT_LEN]) {
 		}
 
 		// roots, suffixes
-		rword_old = rword;
-		lword = buf_search_forth(lword, out, &li, &get_root);
-		rword = search_back(lword, rword, out, &ri, &get_suffix);
+		//li_buf = li;
+		//ri_buf = ri;
+		//out_copy(out, out_buf);
+
+		// greedy search
+		lword = search_forth(lword,        out, &li, &get_root);
+		rword = search_back( lword, rword, out, &ri, &get_suffix);
+
+		// ungreedy search
+		//lword = search_forth_buf(lword,        out_buf, &li_buf, &get_root);
+		//rword = search_back(     lword, rword, out_buf, &ri_buf, &get_suffix);
+
+		// greedy output == ungreedy outupt
+		//is_equal = out_compare(out, out_buf);
 
 		match = true;
     }
-
-	print_all(out, &li, &ri);
 }
 
 
+
+
 int main() {
-    FILE *file_in = fopen("data/tekstaro.txt", "r");
-    if (file_in == NULL) {
+    FILE *fin = fopen("data/tekstaro.txt", "r");
+    if (fin == NULL) {
         perror("Error opening input file");
         return 1;
     }
-    FILE *file_out = freopen("out.txt", "w", stdout);
-    if (file_out == NULL) {
+    FILE *fout = fopen("data/dataset.txt", "w");
+    if (fout == NULL) {
         perror("Error opening output file");
         return 1;
     }
 
-	char (*out)[OUT_LEN] = malloc(OUT_NUM * sizeof(*out));
-	for (int i = 0; i < OUT_NUM; i++) {
-		strcpy(out[i], "");
-	}
+	char (*out)[OL]     = out_alloc();
+	char (*out_buf)[OL] = out_alloc();
 
 	char line[4096];
-	while ((fgets(line, sizeof(line), file_in)) != NULL) {
-		morphemize(line, out);
+	while ((fgets(line, sizeof(line), fin)) != NULL) {
+		morphemize(line, out, out_buf, fout);
 	}
-	free(out);
 
 	fflush(stdout);
 
-    fclose(file_in);
-    fclose(file_out);
+	free(out);
+	free(out_buf);
+
+    fclose(fin);
+    fclose(fout);
     return 0;
 }

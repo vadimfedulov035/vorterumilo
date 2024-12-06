@@ -5,7 +5,7 @@
 #include "search.h"
 
 
-char *strip_jn(char *rword, char (*out)[OUT_LEN], int *i) {
+char *strip_jn(char *rword, char (*out)[OL], int *i) {
 
 	/* indicate case (-/-n) and number (-/-j) categories *
 	 * for nouns (-o) and adjectives (-a), adverbs (-e)  *
@@ -44,7 +44,7 @@ char *strip_jn(char *rword, char (*out)[OUT_LEN], int *i) {
 }
 
 
-char *strip_oae(char *rword, char (*out)[OUT_LEN], int *i) {
+char *strip_oae(char *rword, char (*out)[OL], int *i) {
 
 	/* indicate word class                           *
 	 * for nouns (-o), adjectives (-a), adverbs (-e) *
@@ -120,7 +120,7 @@ enum Match strip_verb_end_1(char *rword, char *dst) {
 }
 
 
-char *strip_verb_end(char *rword, char (*out)[OUT_LEN], int *i) {
+char *strip_verb_end(char *rword, char (*out)[OL], int *i) {
 	char *dst = out[*i];
 
 	enum Match match = strip_verb_end_1(rword, dst);
@@ -137,7 +137,7 @@ char *strip_verb_end(char *rword, char (*out)[OUT_LEN], int *i) {
 }
 
 
-void sprintf_res(struct word *res, char (*out)[OUT_LEN], int i) {
+void sprintf_res(struct Res *res, char (*out)[OL], int i) {
 
 	bool is_meta = (res->def[0] == '*');
 	if (is_meta) {
@@ -148,11 +148,27 @@ void sprintf_res(struct word *res, char (*out)[OUT_LEN], int i) {
 }
 
 
-bool search_full(char *lword, char (*out)[OUT_LEN], int *li, Get get) {
-	struct word *res = get(lword, strlen(lword));
+bool got_res(struct Res *res) {
+	if (res == NULL) {
+		return false;
+	}
 
-	bool match = (res != NULL && res->word != NULL && res->eng != NULL && res->def != NULL);
-	if (match) {
+	bool got_word = (res->word == NULL);
+	bool got_eng  = (res->eng  == NULL);
+	bool got_def  = (res->def  == NULL);
+	if (got_word || got_eng || got_def) {
+		return false;
+	}
+
+	return true;
+}
+
+
+bool search_full(char *lword, char (*out)[OL], int *li, G get) {
+	struct Res *res = get(lword, strlen(lword));
+
+	bool match;
+	if (match = got_res(res)) {
 		sprintf_res(res, out, (*li)++);
 	}
 
@@ -160,45 +176,71 @@ bool search_full(char *lword, char (*out)[OUT_LEN], int *li, Get get) {
 }
 
 
-char *buf_search_forth(char *lword, char (*out)[OUT_LEN], int *li, Get get) {
+char *search_forth(char *lword, char (*out)[OL], int *li, G get) {
+	size_t wordlen = strlen(lword);
 
-	struct word *res;
+	struct Res *res;
+    for (size_t n = 1; n <= wordlen; n++) {
+
+		char buf[n + 1];
+		strncpy(buf, lword, n);
+		buf[n] = '\0';
+
+		res = get(buf, n);
+		if (got_res(res)) {
+			sprintf_res(res, out, (*li)++);
+			lword = lword + n;
+			n = strlen(lword) - 1;
+		}
+	}
+
+	return lword;
+}
+
+
+char *search_forth_buf(char *lword, char (*out)[OL], int *li, G get) {
+	char *lword_old = lword;
+
+	struct Res *res;
+	bool match;
     for (size_t n = strlen(lword); n > 0; n--) {
 
 		char buf[n + 1];
 		strncpy(buf, lword, n);
 		buf[n] = '\0';
 
-        res = get(buf, n);
-        if (res != NULL && res->word != NULL && res->eng != NULL && res->def != NULL) {
+		res = get(buf, n);
+		if (match = got_res(res)) {
 			sprintf_res(res, out, (*li)++);
-
 			lword = lword + n;
 			n = strlen(lword) + 1;
         }
     }
 
+	if (!match) {
+		lword = lword_old;
+	}
+
 	return lword;
 }
 
 
-char
-*search_back(char *lword, char *rword, char (*out)[OUT_LEN], int *ri, Get get) {
-	bool match = false;
+char *search_back(char *lword, char *rword, char (*out)[OL], int *ri, G get) {
 	char *rword_old = rword;
 
-	struct word *res;
+	struct Res *res;
+	bool match;
 	for (; rword >= lword; rword--) {
         res = get(rword, strlen(rword));
-        if (res != NULL && res->word != NULL && res->eng != NULL && res->def != NULL) {
-			match = true;
+
+        if (match = got_res(res)) {
 			sprintf_res(res, out, (*ri)--);
             *rword = '\0';
         }
     }
 
 	if (!match) {
-		return rword_old;
+		rword = rword_old;
 	}
 
 	return rword;

@@ -1,10 +1,6 @@
 #ifndef VOCAB_H
 #define VOCAB_H
 
-#ifndef STDDEF_H
-#define NULL ((void *)0)
-#endif
-
 // SERVE WORD CLASSES
 #define ANSW    "answer word"
 #define ADV     "adverb"

@@ -1,5 +1,5 @@
 /* ANSI-C code produced by gperf version 3.1 */
-/* Command-line: 'C:\\Program Files\\Git\\usr\\local\\bin\\gperf.exe' -t -o vocab/meta.gperf  */
+/* Command-line: gperf -t -o vocab/meta.gperf  */
 /* Computed positions: -k'1-6' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -34,7 +34,7 @@
 #include <string.h>
 #include "../vocab/vocab.h"
 #line 7 "vocab/meta.gperf"
-struct word { char *word; char *eng; char *def; };
+struct Res { char *word; char *eng; char *def; };
 
 #define TOTAL_KEYWORDS 113
 #define MIN_WORD_LENGTH 2
@@ -108,10 +108,10 @@ hash (register const char *str, register size_t len)
   return hval;
 }
 
-struct word *
+struct Res *
 get_meta (register const char *str, register size_t len)
 {
-  static struct word wordlist[] =
+  static struct Res wordlist[] =
     {
       {""}, {""},
 #line 83 "vocab/meta.gperf"

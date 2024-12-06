@@ -1,14 +1,10 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#ifndef STDDEF_H
-#define NULL ((void *)0)
-#endif
-
 #include <stdbool.h>
 
-#define OUT_NUM 25
-#define OUT_LEN 500
+#define ON 25
+#define OL 500
 
 // CATEGORY OF CASE (definition)
 #define ACC_CASE "-n (accusative case)"
@@ -38,20 +34,21 @@ enum Match {
 	EXCEPTION = -1
 };
 
-char *strip_jn(char *rword, char (*out)[OUT_LEN], int *i);
-char *strip_oae(char *rword, char (*out)[OUT_LEN], int *i);
-char *strip_verb_end(char *rword, char (*out)[OUT_LEN], int *i);
+char *strip_jn(char *rword, char (*out)[OL], int *i);
+char *strip_oae(char *rword, char (*out)[OL], int *i);
+char *strip_verb_end(char *rword, char (*out)[OL], int *i);
 
-struct word { char *word; char *eng; char *def; };
-typedef struct word* (*Get)(const char *, unsigned int);
+struct Res { char *word; char *eng; char *def; };
+typedef struct Res* (*G) (const char *, unsigned int);
 
-struct word* get_core(const char *, unsigned int);
-struct word* get_meta(const char *, unsigned int);
-struct word* get_root(const char *, unsigned int);
-struct word* get_suffix(const char *, unsigned int);
+struct Res* get_core(const char *, unsigned int);
+struct Res* get_meta(const char *, unsigned int);
+struct Res* get_root(const char *, unsigned int);
+struct Res* get_suffix(const char *, unsigned int);
 
-bool search_full(char *lword, char (*defs)[OUT_LEN], int *li, Get get);
-char *buf_search_forth(char *lword, char (*defs)[OUT_LEN], int *li, Get get);
-char *search_back(char *lword, char *rword, char (*defs)[OUT_LEN], int *ri, Get get);
+bool search_full(char *lword, char (*out)[OL], int *li, G get);
+char *search_forth(char *lword, char (*out)[OL], int *li, G get);
+char *search_forth_buf(char *lword, char (*out)[OL], int *li, G get);
+char *search_back(char *lword, char *rword, char (*out)[OL], int *ri, G get);
 
 #endif

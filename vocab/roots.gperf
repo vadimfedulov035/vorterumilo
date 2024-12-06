@@ -4,7 +4,7 @@
 #include <string.h>
 #include "../vocab/vocab.h"
 %}
-struct word { char *word; char *eng; char *def; };
+struct Res { char *word; char *eng; char *def; };
 %%
 // PREFIXES
 "bo",           "-in-law/relative by marriage",                        "1<",

@@ -1,5 +1,5 @@
 /* ANSI-C code produced by gperf version 3.1 */
-/* Command-line: 'C:\\Program Files\\Git\\usr\\local\\bin\\gperf.exe' -t -o vocab/suffixes.gperf  */
+/* Command-line: gperf -t -o vocab/suffixes.gperf  */
 /* Computed positions: -k'1-3' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -34,7 +34,7 @@
 #include <string.h>
 #include "../vocab/vocab.h"
 #line 7 "vocab/suffixes.gperf"
-struct word { char *word; char *eng; char *def; };
+struct Res { char *word; char *eng; char *def; };
 
 #define TOTAL_KEYWORDS 42
 #define MIN_WORD_LENGTH 1
@@ -99,10 +99,10 @@ hash (register const char *str, register size_t len)
   return hval;
 }
 
-struct word *
+struct Res *
 get_suffix (register const char *str, register size_t len)
 {
-  static struct word wordlist[] =
+  static struct Res wordlist[] =
     {
       {""},
 #line 38 "vocab/suffixes.gperf"

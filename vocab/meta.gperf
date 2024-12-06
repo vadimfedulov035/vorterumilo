@@ -4,7 +4,7 @@
 #include <string.h>
 #include "../vocab/vocab.h"
 %}
-struct word { char *word; char *eng; char *def; };
+struct Res { char *word; char *eng; char *def; };
 %%
 // PRONOUNS
 "mi",          "mi [I] ("        PER PRO FIR SING    ")",           "*",

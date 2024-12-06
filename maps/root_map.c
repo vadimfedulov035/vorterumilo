@@ -1,5 +1,5 @@
 /* ANSI-C code produced by gperf version 3.1 */
-/* Command-line: 'C:\\Program Files\\Git\\usr\\local\\bin\\gperf.exe' -t -o vocab/roots.gperf  */
+/* Command-line: gperf -t -o vocab/roots.gperf  */
 /* Computed positions: -k'1-7,$' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -34,7 +34,7 @@
 #include <string.h>
 #include "../vocab/vocab.h"
 #line 7 "vocab/roots.gperf"
-struct word { char *word; char *eng; char *def; };
+struct Res { char *word; char *eng; char *def; };
 
 #define TOTAL_KEYWORDS 4985
 #define MIN_WORD_LENGTH 2
@@ -114,10 +114,10 @@ hash (register const char *str, register size_t len)
   return hval + asso_values[(unsigned char)str[len - 1]];
 }
 
-struct word *
+struct Res *
 get_root (register const char *str, register size_t len)
 {
-  static struct word wordlist[] =
+  static struct Res wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 21 "vocab/roots.gperf"

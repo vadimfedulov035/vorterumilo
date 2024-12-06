@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-from os import listdir
-from os.path import join
-
+import os
+import shutil
 import re
+import requests
+import zipfile
 
 from bs4 import BeautifulSoup
 
-path = "texts"
-files = [join(path, file) for file in listdir(path)]
 
 
 def clean(text):
+    print("Starting cleaning...")
 
     # quotation marks
     text = re.sub(r"[“”]", "\"", text)
@@ -57,14 +57,73 @@ def clean(text):
     text = re.sub(r"\b(http|www).*\\?\b", link, text)
     text = re.sub(r"\b.+(php|html).*\b", link, text)
 
+    print("Cleaned successfully...")
+
     return text
 
 
-if __name__ == "__main__":
+def download_file(url, zip_path):
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(zip_path, 'wb') as f:
+            f.write(response.content)
+        print(f"Downloaded: {zip_path}")
+    else:
+        print(f"Failed to download file: {response.status_code}")
+
+
+def unzip(zip_path, extract_path):
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_path)
+        print(f"Extracted: {extract_path}")
+
+
+def check_existence(dataset):
+    if os.path.exists(dataset):
+        print(f"{dataset} found.")
+        exit(0)
+    else:
+        print(f"No {dataset}. Downloading archive...")
+
+
+def get_data(dataset):
+    tekstaro_name = 'tekstaro_de_esperanto_html_sen_streketoj'
+    tekstaro_website = 'https://tekstaro.com/elshutebla'
+    tekstaro_zip = f'{tekstaro_name}.zip'
+
+    tekstaro_url = f'{tekstaro_website}/{tekstaro_zip}'
+    download_file(tekstaro_url, tekstaro_zip)
+
+    unzip(tekstaro_zip, './')
+    os.remove(tekstaro_zip)
+
+    shutil.move(os.path.join(tekstaro_name, 'tekstoj'), 'tekstoj')
+    shutil.rmtree(tekstaro_name)
+
+    shutil.rmtree(os.path.join('tekstoj', 'bildoj'))
+
+
+def write_data(dataset):
+    tekstaro = ""
+
+    files = [file for file in os.listdir('tekstoj')]
     for file in files:
-        with open(file) as f:
+        with open(os.path.join('tekstoj', file)) as f:
             data = f.read()
             gfg = BeautifulSoup(data, "lxml")
-            text = gfg.get_text()
-            text = clean(text)
-            print(text)
+            tekstaro += gfg.get_text()
+    shutil.rmtree('tekstoj')
+
+    tekstaro = clean(tekstaro)
+
+    with open(dataset, 'w') as f:
+        f.write(tekstaro)
+
+
+if __name__ == "__main__":
+
+    dataset = os.path.join('data', 'tekstaro.txt')
+    check_existence(dataset)
+
+    get_data(dataset)
+    write_data(dataset)
