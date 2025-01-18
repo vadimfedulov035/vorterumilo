@@ -1,0 +1,50 @@
+%define slot-name word
+%define lookup-function-name get_suffix
+%{
+#include <string.h>
+#include "../vocab/vocab.h"
+%}
+struct Res { char *word; char *eng; char *def; };
+%%
+// BASE SUFFIXES
+"aĵ",           "manifestation",                                       "1n",
+"an",           "member",                                              "1n",
+"ar",           "collection",                                          "1n",
+"ec",           "quality",                                             "1n",
+"ej",           "place",                                               "1n",
+"estr",         "boss",                                                "1n",
+"id",           "kid",                                                 "1n",
+"il",           "instrument",                                          "1n",
+"in",           "female gender",                                       "1n",
+"ist",          "professional",                                        "1n",
+"ism",          "ideology",                                            "1n",
+"uj",           "container/country",                                   "1n",
+"ul",           "person",                                              "1n",
+"ebl",          "possible",                                            "1a",
+"em",           "prone to",                                            "1a",
+"ind",          "worthy of",                                           "1a",
+"obl",          "multiple",                                            "1a",
+"on",           "fraction",                                            "1a",
+"ig",           "causative",                                           "1v",
+"iĝ",           "anticausative",                                       "1v",
+"ad",           "continuous",                                          "1x",
+"eg",           "augmentative",                                        "1x",
+"et",           "diminutive",                                          "1x",
+"um",           "<ad hoc>",                                            "1x",
+"aĉ",           "pejorative",                                          "1x",
+"ĉj",           "male diminuitive",                                    "1x",
+"end",          "mandatory",                                           "1x",
+"er",           "particle",                                            "1x",
+"i",            "country",                                             "1x",
+"ing",          "holder",                                              "1x",
+"nj",           "female diminutive",                                   "1x",
+"op",           "group",                                               "1x",
+// PARTICIPLE SUFFIXES
+"ant",          "present active participle",                           "1v",
+"it",           "present passive participle",                          "1v",
+"at",           "present continuous passive participle",               "1v",
+"int",          "past active participle",                              "1v",
+"ont",          "future active participle",                            "1v",
+"ot",           "future passive participle",                           "1v",
+"unt",          "conditional active participle",                       "1v",
+"ut",           "conditional passive participle",                      "1v",
